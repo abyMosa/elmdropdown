@@ -5,7 +5,7 @@ var MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const production = 'production';
 const development = 'development';
 
-const cssRule = function (mode) {
+const sassRule = function (mode) {
     return {
         test: /\.s[ac]ss$/i,
         use: [
@@ -21,9 +21,29 @@ const cssRule = function (mode) {
                 loader: 'css-loader',
                 options: { importLoaders: 1 }
             },
-            { 
+            {
                 loader: 'sass-loader',
                 options: { implementation: require('sass') }
+            },
+        ],
+    };
+};
+
+const cssRule = function (mode) {
+    return {
+        test: /\.(p?css)$/,
+        use: [
+            mode == development
+                ? { loader: 'style-loader' }
+                : {
+                    loader: MiniCssExtractPlugin.loader,
+                    options: {
+                        publicPath: '/',
+                    },
+                },
+            {
+                loader: 'css-loader',
+                options: { importLoaders: 1 }
             },
         ],
     };
@@ -48,6 +68,7 @@ module.exports = (env, argv) => {
 
         module: {
             rules: [
+                sassRule(argv.mode),
                 cssRule(argv.mode),
                 {
                     test: /\.html$/,

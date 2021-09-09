@@ -1,7 +1,9 @@
 module Main exposing (..)
 
 import Browser
-import Html
+import Components.Categories as Categories
+import Html exposing (..)
+import Html.Attributes exposing (..)
 
 
 type alias Model =
@@ -17,6 +19,7 @@ init _ =
 
 type Msg
     = NoOp
+    | CategoriesMsg Categories.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -25,11 +28,17 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
+        CategoriesMsg subMsg ->
+            ( model, Cmd.none )
+
 
 view : Model -> Browser.Document Msg
 view model =
     { title = "Elm Dropdown"
-    , body = []
+    , body =
+        [ Categories.view
+            |> Html.map CategoriesMsg
+        ]
     }
 
 
