@@ -1,0 +1,30 @@
+.multiselect {
+    position: relative;
+
+    &__options {
+        display: none;
+        position: absolute;
+        background-color: #FAFAFA;
+        min-width: 120px;
+        top: 100%;
+        right: 0px;
+        padding: 10px 10px 10px 15px;
+        max-height: 280px;
+        overflow: auto;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, .2);
+
+        input {
+            margin-right: 10px;
+        }
+    }
+
+    &--is-open &__options {
+        display: block;
+    }
+
+    // &__options--inner {}
+
+    &__option {
+        padding: 10px 0px;
+    }
+}
