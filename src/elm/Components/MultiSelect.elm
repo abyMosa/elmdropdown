@@ -1,15 +1,17 @@
 module Components.MultiSelect exposing (..)
 
+import Browser.Events exposing (onMouseDown)
 import Dict exposing (Dict)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, button, div, h3, input, label, p, span, text)
+import Html.Attributes exposing (class, classList, id, type_)
 import Html.Events exposing (on, onCheck, onClick)
 import Json.Decode as Decode
 import Task
 
 
 type alias Model =
-    { isOpen : Bool
+    { id : String
+    , isOpen : Bool
     , options : Dict Int ( String, Bool )
     }
 
@@ -26,19 +28,19 @@ type alias Handlers msg =
     }
 
 
-init : List String -> Model
-init options =
+init : String -> List String -> Model
+init id options =
     options
         |> List.indexedMap (\idx v -> ( idx, ( v, False ) ))
         |> Dict.fromList
-        |> Model False
+        |> Model id False
 
 
 update : Handlers msg -> Msg -> Model -> ( Model, Cmd msg )
 update h msg model =
     case msg of
         BtnClicked ->
-            ( { model | isOpen = True }, Cmd.none )
+            ( { model | isOpen = not model.isOpen }, Cmd.none )
 
         ClickOutside ->
             ( { model | isOpen = False }, Cmd.none )
@@ -68,20 +70,25 @@ update h msg model =
 view : Handlers msg -> Model -> Html msg
 view h model =
     div
-        [ class "multiselect"
+        [ id model.id
         , classList
-            -- [ ( "multiselect--has-value", List.length model.selected > 0 )
-            [ ( "multiselect--has-value", False )
+            [ ( "multiselect", True )
             , ( "multiselect--is-open", model.isOpen )
             ]
         ]
-        [ button [ onClick (h.tagger BtnClicked) ]
-            [ text "compare" ]
-        , node "on-click-outside"
-            [ class "multiselect__options"
-            , id "dropdown"
-            , on "clickoutside" (Decode.succeed (ClickOutside |> h.tagger))
+        [ button
+            [ class "button is-rounded is-small"
+            , classList
+                [ ( "is-link", model.isOpen )
+                , ( "is-light", not model.isOpen )
+                ]
+            , onClick (h.tagger BtnClicked)
             ]
+            [ span [] [ text "compare" ]
+            , span [] [ text "▼" ]
+            ]
+        , div
+            [ class "multiselect__options" ]
             [ div [ class "multiselect__options--inner" ]
                 (model.options
                     |> Dict.map (renderOption h)
@@ -108,3 +115,43 @@ renderOption h idx option =
 emit : msg -> Cmd msg
 emit msg =
     Task.attempt (always msg) (Task.succeed ())
+
+
+isOutsideDropdown : String -> Decode.Decoder Bool
+isOutsideDropdown dropdownId =
+    Decode.oneOf
+        [ Decode.field "id" Decode.string
+            |> Decode.andThen
+                (\id ->
+                    if dropdownId == id then
+                        Decode.succeed False
+
+                    else
+                        Decode.fail "continue"
+                )
+        , Decode.lazy
+            (\_ -> isOutsideDropdown dropdownId |> Decode.field "parentNode")
+        , Decode.succeed True
+        ]
+
+
+outsideTarget : String -> Decode.Decoder Msg
+outsideTarget dropdownId =
+    Decode.field "target" (isOutsideDropdown dropdownId)
+        |> Decode.andThen
+            (\isOutside ->
+                if isOutside then
+                    Decode.succeed ClickOutside
+
+                else
+                    Decode.fail "inside dropdown"
+            )
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    if model.isOpen then
+        onMouseDown (outsideTarget model.id)
+
+    else
+        Sub.none

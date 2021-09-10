@@ -2,8 +2,7 @@ module Main exposing (..)
 
 import Browser
 import Components.Categories as Categories
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html
 
 
 type alias Model =
@@ -36,7 +35,7 @@ update msg model =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Elm Dropdown"
+    { title = "Elm MultiSelect"
     , body =
         [ Categories.view model.categories
             |> Html.map CategoriesMsg
@@ -45,8 +44,9 @@ view model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
+subscriptions model =
+    Sub.map CategoriesMsg <|
+        Categories.subscriptions model.categories
 
 
 main : Program () Model Msg

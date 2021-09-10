@@ -5,13 +5,29 @@
         display: none;
         position: absolute;
         background-color: #FAFAFA;
-        min-width: 120px;
+        min-width: 115px;
         top: 100%;
         right: 0px;
         padding: 10px 10px 10px 15px;
-        max-height: 280px;
+        max-height: 250px;
+        border-radius: 4px;
         overflow: auto;
         box-shadow: 0px 2px 6px rgba(0, 0, 0, .2);
+        z-index: 2;
+
+
+        &::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        &::-webkit-scrollbar-track {
+            background-color: none;
+            -webkit-box-shadow: none;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: gray;
+        }
 
         input {
             margin-right: 10px;
@@ -22,9 +38,16 @@
         display: block;
     }
 
-    // &__options--inner {}
-
     &__option {
         padding: 10px 0px;
+        font-size: small;
+    }
+
+    button{
+        text-transform: uppercase;
+        span:last-child{
+            margin-left: 5px;
+            font-size: 10px;
+        }
     }
 }
